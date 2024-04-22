@@ -4,6 +4,7 @@ import {
   Routes,
   Navigate,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
 import "./App.css";
 import Navbar from "./component/Navbar";
@@ -18,7 +19,13 @@ import NotFound from "./pages/NotFound";
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
+  const handleLogout = () => {
+    setIsLoggedIn(() => false);
+    localStorage.clear();
+    navigate("/");
+  };
   useEffect(() => {
     const userFetch = JSON.parse(localStorage.getItem("user"));
     if (userFetch) {
@@ -28,7 +35,7 @@ function App() {
 
   return (
     <>
-      {isLoggedIn && <Navbar />}
+      {isLoggedIn && <Navbar onLogout={handleLogout} />}
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />

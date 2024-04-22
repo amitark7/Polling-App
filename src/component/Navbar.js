@@ -2,23 +2,17 @@ import React, { useEffect, useState } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 
-const Navbar = () => {
+const Navbar = ({ onLogout }) => {
   const [userData, setUserData] = useState({});
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const getUser = JSON.parse(localStorage.getItem("user"));
-    if (getUser) {
-      setUserData(getUser);
+    const User = JSON.parse(localStorage.getItem("user"));
+    if (User) {
+      setUserData(User);
     }
   }, []);
-
-  const handleLogout = () => {
-    localStorage.clear();
-    setShowLogoutModal(false);
-    navigate("/");
-  };
 
   return (
     <div className="flex flex-col md:flex-row justify-between items-center px-6 md:px-20 py-2 bg-blue-400">
@@ -26,15 +20,19 @@ const Navbar = () => {
         <li>
           <Link to={"/polling"}>Polls</Link>
         </li>
-        <li>
-          <Link to={"/addpoll"}>Add Poll</Link>
-        </li>
-        <li>
-          <Link to={"/createuser"}>Create User</Link>
-        </li>
-        <li>
-          <Link to={"/users"}>List Users</Link>
-        </li>
+        {userData.roleId === 1 && (
+          <>
+            <li>
+              <Link to={"/addpoll"}>Add Poll</Link>
+            </li>
+            <li>
+              <Link to={"/createuser"}>Create User</Link>
+            </li>
+            <li>
+              <Link to={"/users"}>List Users</Link>
+            </li>
+          </>
+        )}
       </ul>
       <div className="relative">
         <div
@@ -52,7 +50,7 @@ const Navbar = () => {
         {showLogoutModal && (
           <div className="absolute right-0 bg-white p-4 shadow-md rounded-md">
             <button
-              onClick={handleLogout}
+              onClick={onLogout}
               className="bg-red-500 text-white px-10 py-2 rounded-md mr-2"
             >
               Logout
