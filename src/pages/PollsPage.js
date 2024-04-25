@@ -1,36 +1,26 @@
 import React, { useEffect, useState } from "react";
 import PollItem from "../component/PollItem";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchPolls } from "../redux/reducer/pollReducer";
 
 const PollsPage = () => {
   const [pollList, setPollList] = useState([]);
   const [pageNumber, setPageNumber] = useState(1);
-
-  const fetchPolls = async (userToken) => {
-    const response = await fetch(
-      `${process.env.REACT_APP_BASE_URL}poll/list/${pageNumber}?limit=10`,
-      {
-        method: "GET",
-        headers: {
-          token: `${userToken}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    const jsonData = await response.json();
-    if (jsonData) {
-      setPollList(jsonData.rows);
-    }
-  };
+  const { poll } = useSelector((state) => state.poll);
+  const dispatch = useDispatch();
+  console.log(poll);
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("token"));
-    if (user) {
-      fetchPolls(user);
-    }
-  });
+    dispatch(fetchPolls(pageNumber));
+  }, [pageNumber]);
 
-  return pollList?.map((poll, index) => {
-    return <PollItem key={index} poll={poll} />;
-  });
+  return (
+    <div>
+      <button onClick={() => setPageNumber(pageNumber + 1)}>PageNumber</button>
+      {/* {pollList?.map((poll, index) => {
+        return <PollItem key={index} poll={poll} />;
+      })} */}
+    </div>
+  );
 };
 
 export default PollsPage;

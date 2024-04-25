@@ -1,9 +1,13 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import "react-toastify/dist/ReactToastify.css";
+import { ValidateForm } from "../utils/ValidationCheck";
+import { useDispatch, useSelector } from "react-redux";
+import { signupUser } from "../redux/reducer/AuthReducer";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { loading } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const [userData, setUserData] = useState({
     firstName: "",
     lastName: "",
@@ -17,85 +21,30 @@ const Signup = () => {
 
   const formOnChange = (e) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: "" });
   };
   const handleNavigate = () => {
     navigate("/");
     setShowModal(false);
   };
-  const validateForm = () => {
-    let isValid = true;
-    const errors = {};
-
-    if (userData.firstName.length < 6) {
-      errors.firstName = "First name must be at least 6 characters.";
-      isValid = false;
-    }
-
-    if (!userData.lastName.trim()) {
-      errors.lastName = "Last name is required";
-      isValid = false;
-    }
-
-    if (!userData.email.trim()) {
-      errors.email = "Email is required";
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(userData.email)) {
-      errors.email = "Email is invalid";
-      isValid = false;
-    }
-
-    if (!userData.password.trim()) {
-      errors.password = "Password is required";
-      isValid = false;
-    } else if (userData.password.length < 6) {
-      errors.password = "Password must be at least 6 characters long";
-      isValid = false;
-    }
-
-    if (!userData.confirmPassword.trim()) {
-      errors.confirmPassword = "Confirm password is required";
-      isValid = false;
-    } else if (userData.password !== userData.confirmPassword) {
-      errors.confirmPassword = "Passwords do not match";
-      isValid = false;
-    }
-
-    if (!userData.roleId) {
-      errors.roleId = "Role is required";
-      isValid = false;
-    }
-
-    setErrors(errors);
-    return isValid;
-  };
 
   const onFormSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      try {
-        const response = await fetch(
-          `${process.env.REACT_APP_BASE_URL}user/register`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(userData),
-          }
-        );
-        const jsonData = await response.json();
-        if (jsonData) {
-          setShowModal(true);
-        }
-      } catch (error) {
-        setErrors({ ...errors, email: "Email already exists." });
-        console.log(error);
+    const isFormValid = ValidateForm(userData);
+    if (isFormValid.isValid) {
+      const result = await dispatch(signupUser(userData));
+      if (result.payload?.ok) {
+        setShowModal(true);
+      } else {
+        setErrors({ ...errors, email: "Email already registered" });
       }
+    } else {
+      setErrors(isFormValid.errors);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
+    <div className="flex flex-col items-center justify-center">
       {showModal && (
         <div className="fixed inset-0 flex h-[200px] mt-4 justify-center z-10 text-black">
           <div className="modal-overlay fixed inset-0 bg-gray-500 opacity-50"></div>
@@ -126,7 +75,6 @@ const Signup = () => {
             type="text"
             name="firstName"
             placeholder="First Name"
-            required={true}
             className={`w-full rounded-md py-3 pl-2 outline-none border-2 mt-2 ${
               errors.firstName ? "border-red-700" : ""
             }`}
@@ -208,9 +156,12 @@ const Signup = () => {
         </form>
         <button
           onClick={onFormSubmit}
-          className="w-full bg-green-400 py-2 text-xl rounded-md mb-4 font-semibold"
+          disabled={loading}
+          className={`w-full ${
+            loading ? "bg-blue-400" : "bg-blue-500"
+          } py-2 text-xl rounded-md mb-4 font-semibold`}
         >
-          Signup
+          {loading ? "Loading..." : "Signup"}
         </button>
         <p className="text-base">
           Already have an account? <Link to="/">Login</Link>

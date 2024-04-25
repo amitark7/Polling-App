@@ -1,8 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
+import AuthReducer from "./reducer/AuthReducer";
 import pollReducer from "./reducer/pollReducer";
 
 export const store = configureStore({
   reducer: {
-    polls: pollReducer,
+    auth: AuthReducer,
+    poll: pollReducer,
   },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
 });

@@ -22,7 +22,11 @@ const AddPoll = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Here you can handle the submission logic
+    const newPoll = {
+      title: question,
+      pollId: Date.now(),
+      options: ["Amit", "Sumit"],
+    };
     console.log("Question:", question);
     console.log("Options:", options);
   };
